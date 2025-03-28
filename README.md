@@ -1,5 +1,6 @@
 # IntelliRead - AI增强阅读体验
 
+![screenshot](./image.png)
 IntelliRead是一个Chrome浏览器扩展，利用AI模型帮助用户从网页内容中提取和突出显示关键信息，提升阅读体验。
 
 ## 安装方法
