@@ -39,13 +39,15 @@ async function analyzePageContent() {
         success: false,
         message: 'No content to analyze'
       }
-    for (const el of elements) {
-      // extract text from element
+    
+    // process each element with AI
+    async function processElement(el) {
       const text = el.textContent;
-      // ignore short text
-      if (text.length < 30) continue;
+      if (text.length < 30) return;
+      
       const keypoints = await analyzeWithAI(text, settings);
-      if (keypoints.length === 0) continue;
+      if (keypoints.length === 0) return;
+      
       // filter none existing keypoints
       const filteredKeypoints = keypoints.filter(keypoint => keypoint.length > 0 && text.includes(keypoint));
       
@@ -69,6 +71,30 @@ async function analyzePageContent() {
         });
       }
     }
+
+    // process elements with concurrency limit
+    async function processWithConcurrencyLimit(items, processFunction, limit = 5) {
+      const results = [];
+      const executing = new Set();
+      
+      for (const item of items) {
+        const p = processFunction(item);
+        results.push(p);
+        executing.add(p);
+        
+        const clean = () => executing.delete(p);
+        p.then(clean).catch(clean);
+        
+        if (executing.size >= limit) {
+          await Promise.race(executing);
+        }
+      }
+      
+      return Promise.all(results);
+    }
+    
+    // process elements with concurrency limit
+    await processWithConcurrencyLimit(elements, processElement, 5);
 
     return {
       success: true,
