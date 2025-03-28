@@ -56,9 +56,11 @@
     .action-buttons {
       display: flex;
       justify-content: space-between;
+      flex-wrap: wrap;
     }
     .action-buttons button {
       width: 48%;
+      margin-bottom: 8px;
     }
     .option-row {
       margin: 15px 0;
@@ -99,6 +101,7 @@
     <div class="action-buttons">
       <button id="settings-btn">__MSG_settings_button__</button>
       <button id="clear-btn">__MSG_clear_button__</button>
+      <button id="clear-domain-cache-btn">__MSG_clear_domain_cache_button__</button>
     </div>
     <div id="status" class="status info" style="display: none;"></div>
   </div>

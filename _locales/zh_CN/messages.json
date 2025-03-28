@@ -154,5 +154,17 @@
   "auto_highlight_error": {
     "message": "设置自动高亮偏好失败",
     "description": "自动高亮错误提示"
+  },
+  "clear_domain_cache_button": {
+    "message": "清除网站缓存",
+    "description": "清除网站缓存按钮"
+  },
+  "domain_cache_cleared": {
+    "message": "当前网站的缓存已清除",
+    "description": "网站缓存清除提示"
+  },
+  "domain_cache_clear_failed": {
+    "message": "清除网站缓存失败",
+    "description": "网站缓存清除失败提示"
   }
 } 

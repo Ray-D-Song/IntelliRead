@@ -4,6 +4,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const analyzeButton = document.getElementById('analyze-btn');
   const settingsButton = document.getElementById('settings-btn');
   const clearButton = document.getElementById('clear-btn');
+  const clearDomainCacheButton = document.getElementById('clear-domain-cache-btn');
   const statusDiv = document.getElementById('status');
   const autoHighlightCheckbox = document.getElementById('auto-highlight-checkbox');
   const currentDomainSpan = document.getElementById('current-domain');
@@ -71,6 +72,23 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
+  // clear domain cache button
+  clearDomainCacheButton.addEventListener('click', () => {
+    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+      chrome.tabs.sendMessage(
+        tabs[0].id,
+        { action: 'clearDomainCache' },
+        (response) => {
+          if (response && response.success) {
+            showStatus(chrome.i18n.getMessage('domain_cache_cleared'), 'info');
+          } else {
+            showStatus(chrome.i18n.getMessage('domain_cache_clear_failed'), 'warning');
+          }
+        }
+      );
+    });
+  });
+
   // show status information
   function showStatus(message, type) {
     statusDiv.textContent = message;
@@ -132,6 +150,7 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('analyze-btn').textContent = chrome.i18n.getMessage('analyze_button');
     document.getElementById('settings-btn').textContent = chrome.i18n.getMessage('settings_button');
     document.getElementById('clear-btn').textContent = chrome.i18n.getMessage('clear_button');
+    document.getElementById('clear-domain-cache-btn').textContent = chrome.i18n.getMessage('clear_domain_cache_button');
     document.querySelector('h1').textContent = chrome.i18n.getMessage('popup_title');
     
     document.title = chrome.i18n.getMessage("popup_title");

@@ -66,6 +66,23 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     }
     sendResponse({ success: true });
     return true;
+  } else if (request.action === 'clearDomainCache') {
+    // Clear cache for current domain
+    if (window.IntelliReadCache && window.IntelliReadCache.clearDomainCache) {
+      window.IntelliReadCache.clearDomainCache()
+        .then((result) => {
+          clearHighlights(); // Also clear highlights on the page
+          sendResponse({ success: result });
+        })
+        .catch(error => {
+          console.error('Error clearing domain cache:', error);
+          sendResponse({ success: false, error: error.message });
+        });
+      return true;
+    } else {
+      sendResponse({ success: false, error: 'Cache system not ready' });
+      return true;
+    }
   } else if (request.action === 'getDomainAutoHighlightStatus') {
     // Get auto-highlight status for the current domain
     if (window.IntelliReadCache && window.IntelliReadCache.isDomainAutoHighlightEnabled) {

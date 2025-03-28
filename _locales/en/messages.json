@@ -154,6 +154,18 @@
   "auto_highlight_error": {
     "message": "Failed to set auto-highlight preference",
     "description": "Auto-highlight error notification"
+  },
+  "clear_domain_cache_button": {
+    "message": "Clear domain cache",
+    "description": "Clear domain cache button"
+  },
+  "domain_cache_cleared": {
+    "message": "Cache for current domain has been cleared",
+    "description": "Domain cache cleared notification"
+  },
+  "domain_cache_clear_failed": {
+    "message": "Failed to clear domain cache",
+    "description": "Domain cache clear failed notification"
   }
 }
  

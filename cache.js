@@ -470,9 +470,87 @@ async function cacheAnalysisResult(content, keypoints) {
   }
 }
 
+/**
+ * Clear all cache entries for the current domain
+ * @returns {Promise<void>}
+ */
+async function clearDomainCache() {
+  try {
+    const domain = getCurrentDomain();
+    const db = await openDatabase();
+    
+    // Clear highlight cache for this domain
+    const highlightTransaction = db.transaction(STORE_NAME, 'readwrite');
+    const highlightStore = highlightTransaction.objectStore(STORE_NAME);
+    const highlightIndex = highlightStore.index('domain');
+    const domainRange = IDBKeyRange.only(domain);
+    
+    await new Promise((resolve, reject) => {
+      const request = highlightIndex.openCursor(domainRange);
+      
+      request.onsuccess = (event) => {
+        const cursor = event.target.result;
+        if (cursor) {
+          cursor.delete();
+          cursor.continue();
+        }
+      };
+      
+      request.onerror = (event) => {
+        console.error('Failed to clear domain highlight cache:', event.target.error);
+        reject(event.target.error);
+      };
+      
+      highlightTransaction.oncomplete = () => {
+        resolve();
+      };
+    });
+    
+    // Clear highlighted URLs for this domain
+    const urlTransaction = db.transaction(URL_STORE_NAME, 'readwrite');
+    const urlStore = urlTransaction.objectStore(URL_STORE_NAME);
+    
+    await new Promise((resolve, reject) => {
+      const request = urlStore.openCursor();
+      
+      request.onsuccess = (event) => {
+        const cursor = event.target.result;
+        if (cursor) {
+          const url = cursor.value.url;
+          try {
+            const urlObj = new URL(url);
+            if (urlObj.hostname === domain) {
+              cursor.delete();
+            }
+          } catch (error) {
+            console.error('Invalid URL in cache:', url);
+          }
+          cursor.continue();
+        }
+      };
+      
+      request.onerror = (event) => {
+        console.error('Failed to clear domain URL cache:', event.target.error);
+        reject(event.target.error);
+      };
+      
+      urlTransaction.oncomplete = () => {
+        db.close();
+        resolve();
+      };
+    });
+    
+    return true;
+  } catch (error) {
+    console.error('Failed to clear domain cache:', error);
+    return false;
+  }
+}
+
 // mount the functions to the global object
 window.IntelliReadCache.checkCache = checkCache;
 window.IntelliReadCache.cacheAnalysisResult = cacheAnalysisResult;
 window.IntelliReadCache.hasUrlBeenHighlighted = hasUrlBeenHighlighted;
 window.IntelliReadCache.setDomainAutoHighlight = setDomainAutoHighlight;
 window.IntelliReadCache.isDomainAutoHighlightEnabled = isDomainAutoHighlightEnabled;
+window.IntelliReadCache.clearDomainCache = clearDomainCache;
