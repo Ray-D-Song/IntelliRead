@@ -1,5 +1,40 @@
 const HIGHLIGHT_CLASS = 'intelliread-highlight';
 
+// Listen for page load to check if the URL has been highlighted before
+document.addEventListener('DOMContentLoaded', () => {
+  // Check if the page should be automatically highlighted
+  checkAndAutoHighlight();
+});
+
+// Check if the current URL has been highlighted before and apply highlighting if needed
+async function checkAndAutoHighlight() {
+  try {
+    // Wait for cache system to be ready
+    if (!window.IntelliReadCache || !window.IntelliReadCache.hasUrlBeenHighlighted) {
+      console.log('Waiting for cache system to be ready...');
+      setTimeout(checkAndAutoHighlight, 500);
+      return;
+    }
+    
+    // Check if this URL has been highlighted before
+    const wasHighlighted = await window.IntelliReadCache.hasUrlBeenHighlighted();
+    
+    if (wasHighlighted) {
+      console.log('This page was highlighted before. Applying highlights automatically.');
+      // Automatically analyze the page content
+      analyzePageContent().then(response => {
+        if (response.success) {
+          console.log('Auto-highlighting applied successfully.');
+        } else {
+          console.error('Failed to apply auto-highlighting:', response.message);
+        }
+      });
+    }
+  } catch (error) {
+    console.error('Error checking for auto-highlight:', error);
+  }
+}
+
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if (request.action === 'analyzeContent') {
     analyzePageContent().then(response => {
@@ -10,6 +45,17 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     return true;
   } else if (request.action === 'clearHighlights') {
     clearHighlights();
+    sendResponse({ success: true });
+    return true;
+  } else if (request.action === 'cleanupCache') {
+    // Handle cache cleanup request from background script
+    if (window.IntelliReadCache) {
+      // Access clearExpiredCache through a DOM event to avoid direct function call
+      // This is a workaround since the function isn't exposed in the global object
+      const cleanupEvent = new CustomEvent('intelliread-cleanup-cache');
+      document.dispatchEvent(cleanupEvent);
+      console.log('Cache cleanup event dispatched');
+    }
     sendResponse({ success: true });
     return true;
   }

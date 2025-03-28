@@ -27,7 +27,46 @@ chrome.runtime.onInstalled.addListener(() => {
       }
     }
   );
+
+  // Schedule periodic cache cleanup
+  schedulePeriodicCacheCleanup();
 });
+
+// Schedule cache cleanup to run periodically
+function schedulePeriodicCacheCleanup() {
+  // Clean cache every 24 hours (86400000 milliseconds)
+  const CLEANUP_INTERVAL = 24 * 60 * 60 * 1000;
+  
+  // Set up periodic cleanup using alarms API
+  chrome.alarms.create('cacheCleanup', {
+    periodInMinutes: CLEANUP_INTERVAL / 60 / 1000
+  });
+  
+  // Listen for the alarm
+  chrome.alarms.onAlarm.addListener((alarm) => {
+    if (alarm.name === 'cacheCleanup') {
+      cleanupCache();
+    }
+  });
+  
+  // Run cleanup immediately on startup
+  cleanupCache();
+}
+
+// Execute cache cleanup - communicate with content scripts
+function cleanupCache() {
+  console.log('Running scheduled cache cleanup');
+  // Send a message to all tabs to clean their caches
+  chrome.tabs.query({}, (tabs) => {
+    tabs.forEach(tab => {
+      try {
+        chrome.tabs.sendMessage(tab.id, { action: 'cleanupCache' });
+      } catch (e) {
+        // Ignore errors for tabs that don't have our content script
+      }
+    });
+  });
+}
 
 // handle right click menu
 chrome.contextMenus.onClicked.addListener((info, tab) => {

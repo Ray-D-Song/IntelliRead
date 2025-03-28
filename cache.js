@@ -8,11 +8,20 @@ window.IntelliReadCache = {};
 
 // database name and version
 const DB_NAME = 'intelliread-cache';
-const DB_VERSION = 1;
+const DB_VERSION = 2; // Increased version for schema update
 const STORE_NAME = 'highlights';
+const URL_STORE_NAME = 'highlighted_urls'; // New store for highlighted URLs
 
 // cache expiration time (milliseconds), default 30 days
 const CACHE_EXPIRATION = 30 * 24 * 60 * 60 * 1000;
+
+// Listen for cache cleanup event
+document.addEventListener('intelliread-cleanup-cache', () => {
+  console.log('Received cleanup event, clearing expired cache entries');
+  clearExpiredCache().catch(error => {
+    console.error('Failed to clear expired cache from event:', error);
+  });
+});
 
 /**
  * Initialize or open the IndexedDB database
@@ -46,6 +55,12 @@ function openDatabase() {
         // add a timestamp index, for clearing expired cache
         store.createIndex('timestamp', 'timestamp', { unique: false });
       }
+      
+      // Create a new store for highlighted URLs if it doesn't exist
+      if (!db.objectStoreNames.contains(URL_STORE_NAME)) {
+        const urlStore = db.createObjectStore(URL_STORE_NAME, { keyPath: 'url' });
+        urlStore.createIndex('timestamp', 'timestamp', { unique: false });
+      }
     };
   });
 }
@@ -74,6 +89,14 @@ async function calculateHash(content) {
  */
 function getCurrentDomain() {
   return window.location.hostname;
+}
+
+/**
+ * Get the current page's full URL
+ * @returns {string} The current page's full URL
+ */
+function getCurrentUrl() {
+  return window.location.href;
 }
 
 /**
@@ -163,21 +186,96 @@ async function getFromCache(contentHash) {
 }
 
 /**
- * Clear expired cache
+ * Save the current URL to the highlighted URLs store
+ * @returns {Promise<void>}
+ */
+async function saveHighlightedUrl() {
+  try {
+    const url = getCurrentUrl();
+    const db = await openDatabase();
+    
+    const transaction = db.transaction(URL_STORE_NAME, 'readwrite');
+    const store = transaction.objectStore(URL_STORE_NAME);
+    
+    const urlData = {
+      url,
+      timestamp: Date.now()
+    };
+    
+    return new Promise((resolve, reject) => {
+      const request = store.put(urlData);
+      
+      request.onsuccess = () => {
+        resolve();
+      };
+      
+      request.onerror = (event) => {
+        console.error('Failed to save highlighted URL:', event.target.error);
+        reject(event.target.error);
+      };
+
+      transaction.oncomplete = () => {
+        db.close();
+      };
+    });
+  } catch (error) {
+    console.error('Failed to save highlighted URL:', error);
+    throw error;
+  }
+}
+
+/**
+ * Check if the current URL has been highlighted before
+ * @returns {Promise<boolean>} Returns true if the URL has been highlighted before
+ */
+async function hasUrlBeenHighlighted() {
+  try {
+    const url = getCurrentUrl();
+    const db = await openDatabase();
+    
+    const transaction = db.transaction(URL_STORE_NAME, 'readonly');
+    const store = transaction.objectStore(URL_STORE_NAME);
+    
+    return new Promise((resolve, reject) => {
+      const request = store.get(url);
+      
+      request.onsuccess = (event) => {
+        const result = event.target.result;
+        resolve(!!result); // Convert to boolean
+      };
+      
+      request.onerror = (event) => {
+        console.error('Failed to check highlighted URL:', event.target.error);
+        reject(event.target.error);
+      };
+
+      transaction.oncomplete = () => {
+        db.close();
+      };
+    });
+  } catch (error) {
+    console.error('Failed to check highlighted URL:', error);
+    return false;
+  }
+}
+
+/**
+ * Clear expired cache entries from both stores
  * @returns {Promise<void>}
  */
 async function clearExpiredCache() {
   try {
     const db = await openDatabase();
-    const transaction = db.transaction(STORE_NAME, 'readwrite');
-    const store = transaction.objectStore(STORE_NAME);
-    const index = store.index('timestamp');
-    
     const expirationTime = Date.now() - CACHE_EXPIRATION;
-    const range = IDBKeyRange.upperBound(expirationTime);
     
-    return new Promise((resolve, reject) => {
-      const request = index.openCursor(range);
+    // Clear expired highlight cache
+    const highlightTransaction = db.transaction(STORE_NAME, 'readwrite');
+    const highlightStore = highlightTransaction.objectStore(STORE_NAME);
+    const highlightIndex = highlightStore.index('timestamp');
+    const highlightRange = IDBKeyRange.upperBound(expirationTime);
+    
+    await new Promise((resolve, reject) => {
+      const request = highlightIndex.openCursor(highlightRange);
       
       request.onsuccess = (event) => {
         const cursor = event.target.result;
@@ -188,11 +286,38 @@ async function clearExpiredCache() {
       };
       
       request.onerror = (event) => {
-        console.error('Failed to clear expired cache:', event.target.error);
+        console.error('Failed to clear expired highlight cache:', event.target.error);
         reject(event.target.error);
       };
       
-      transaction.oncomplete = () => {
+      highlightTransaction.oncomplete = () => {
+        resolve();
+      };
+    });
+    
+    // Clear expired URL cache
+    const urlTransaction = db.transaction(URL_STORE_NAME, 'readwrite');
+    const urlStore = urlTransaction.objectStore(URL_STORE_NAME);
+    const urlIndex = urlStore.index('timestamp');
+    const urlRange = IDBKeyRange.upperBound(expirationTime);
+    
+    await new Promise((resolve, reject) => {
+      const request = urlIndex.openCursor(urlRange);
+      
+      request.onsuccess = (event) => {
+        const cursor = event.target.result;
+        if (cursor) {
+          cursor.delete();
+          cursor.continue();
+        }
+      };
+      
+      request.onerror = (event) => {
+        console.error('Failed to clear expired URL cache:', event.target.error);
+        reject(event.target.error);
+      };
+      
+      urlTransaction.oncomplete = () => {
         db.close();
         resolve();
       };
@@ -237,6 +362,9 @@ async function cacheAnalysisResult(content, keypoints) {
     // save to the cache
     await saveToCache(contentHash, keypoints);
     
+    // Save the current URL as a highlighted URL
+    await saveHighlightedUrl();
+    
     // clear expired cache periodically
     clearExpiredCache().catch(console.error);
   } catch (error) {
@@ -247,3 +375,4 @@ async function cacheAnalysisResult(content, keypoints) {
 // mount the functions to the global object
 window.IntelliReadCache.checkCache = checkCache;
 window.IntelliReadCache.cacheAnalysisResult = cacheAnalysisResult;
+window.IntelliReadCache.hasUrlBeenHighlighted = hasUrlBeenHighlighted;
