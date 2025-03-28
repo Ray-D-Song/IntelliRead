@@ -314,18 +314,59 @@ Please directly return the JSON array that meets these requirements, without any
     }
 
     try {
+      // use the helper function to handle the JSON return
       const content = data.choices[0].message.content;
-      const keypoints = JSON.parse(content);
-      return Array.isArray(keypoints) ? keypoints : [];
-    } catch (e) {
-      return data.choices[0].message.content
-        .split('\n')
-        .map(line => line.trim())
-        .filter(line => line.length > 0);
+      return parseModelResponse(content);
+    } catch (error) {
+      console.error('AI analysis failed:', error);
+      return [];
     }
   } catch (error) {
     console.error('AI analysis failed:', error);
     return [];
+  }
+}
+
+/**
+ * parse the model response, handle various formats of JSON
+ * @param {string} modelResponse the original response text from the model
+ * @returns {Array<string>} the parsed key points array
+ */
+function parseModelResponse(modelResponse) {
+  try {
+    // try to remove markdown wrapper
+    let cleanedResponse = modelResponse;
+    const markdownJsonRegex = /```(?:json)?\s*([\s\S]*?)\s*```/;
+    const markdownMatch = modelResponse.match(markdownJsonRegex);
+    
+    if (markdownMatch && markdownMatch[1]) {
+      cleanedResponse = markdownMatch[1];
+      console.log('removed markdown format:', { original: modelResponse, cleaned: cleanedResponse });
+    }
+    
+    // try to parse the json string
+    const keypoints = JSON.parse(cleanedResponse);
+    
+    if (Array.isArray(keypoints)) {
+      return keypoints;
+    } else {
+      console.warn('parse result is not an array:', keypoints);
+      return [];
+    }
+  } catch (e) {
+    console.error('JSON parse failed, try alternative parse method:', e);
+    
+    // alternative parse method: split by line
+    try {
+      return modelResponse
+        .replace(/```(?:json)?\s*|\s*```/g, '') // remove markdown markers
+        .split('\n')
+        .map(line => line.trim())
+        .filter(line => line.length > 0 && !line.startsWith('[') && !line.startsWith(']')); // 过滤数组括号行
+    } catch (fallbackError) {
+      console.error('alternative parse method failed:', fallbackError);
+      return [];
+    }
   }
 }
 
@@ -335,4 +376,53 @@ async function getSettings() {
       resolve(response);
     });
   });
+}
+
+/**
+ * test json parser
+ * only for development debugging, not for production environment
+ * @param {string} jsonString the json string to test
+ * @returns {Object} the object contains the result and error info
+ */
+function testJsonParser(jsonString) {
+  const result = {
+    original: jsonString,
+    cleaned: null,
+    parsed: null,
+    error: null,
+    hasMarkdown: false
+  };
+  
+  try {
+    // check if the json string contains markdown
+    const markdownJsonRegex = /```(?:json)?\s*([\s\S]*?)\s*```/;
+    const markdownMatch = jsonString.match(markdownJsonRegex);
+    
+    if (markdownMatch && markdownMatch[1]) {
+      result.hasMarkdown = true;
+      result.cleaned = markdownMatch[1];
+    } else {
+      result.cleaned = jsonString;
+    }
+    
+    // try to parse the json string
+    result.parsed = JSON.parse(result.cleaned);
+    
+  } catch (e) {
+    result.error = e.message;
+    
+    // try to use the alternative parse method
+    try {
+      result.cleaned = jsonString
+        .replace(/```(?:json)?\s*|\s*```/g, '')
+        .trim();
+      result.parsed = result.cleaned.split('\n')
+        .map(line => line.trim())
+        .filter(line => line.length > 0);
+    } catch (fallbackError) {
+      result.fallbackError = fallbackError.message;
+    }
+  }
+  
+  return result;
 }
