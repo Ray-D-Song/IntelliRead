@@ -138,6 +138,22 @@
   "language_zh": {
     "message": "中文",
     "description": "Chinese language option"
+  },
+  "auto_highlight_label": {
+    "message": "Auto-highlight for",
+    "description": "Auto-highlight checkbox label"
+  },
+  "auto_highlight_enabled": {
+    "message": "Auto-highlight enabled for",
+    "description": "Auto-highlight enabled notification"
+  },
+  "auto_highlight_disabled": {
+    "message": "Auto-highlight disabled for",
+    "description": "Auto-highlight disabled notification"
+  },
+  "auto_highlight_error": {
+    "message": "Failed to set auto-highlight preference",
+    "description": "Auto-highlight error notification"
   }
 }
  

@@ -6,21 +6,29 @@ document.addEventListener('DOMContentLoaded', () => {
   checkAndAutoHighlight();
 });
 
-// Check if the current URL has been highlighted before and apply highlighting if needed
+// Check if the current URL has been highlighted before or if the domain has auto-highlight enabled
 async function checkAndAutoHighlight() {
   try {
     // Wait for cache system to be ready
-    if (!window.IntelliReadCache || !window.IntelliReadCache.hasUrlBeenHighlighted) {
+    if (!window.IntelliReadCache || 
+        !window.IntelliReadCache.hasUrlBeenHighlighted || 
+        !window.IntelliReadCache.isDomainAutoHighlightEnabled) {
       console.log('Waiting for cache system to be ready...');
       setTimeout(checkAndAutoHighlight, 500);
       return;
     }
     
-    // Check if this URL has been highlighted before
-    const wasHighlighted = await window.IntelliReadCache.hasUrlBeenHighlighted();
+    // Check if this exact URL has been highlighted before
+    const wasUrlHighlighted = await window.IntelliReadCache.hasUrlBeenHighlighted();
     
-    if (wasHighlighted) {
-      console.log('This page was highlighted before. Applying highlights automatically.');
+    // Check if auto-highlight is enabled for this domain
+    const isDomainAutoHighlightEnabled = await window.IntelliReadCache.isDomainAutoHighlightEnabled();
+    
+    // Apply highlights if the URL was highlighted before or if auto-highlight is enabled for this domain
+    if (wasUrlHighlighted || isDomainAutoHighlightEnabled) {
+      let reason = wasUrlHighlighted ? 'URL was previously highlighted' : 'Auto-highlight is enabled for this domain';
+      console.log(`Applying highlights automatically. Reason: ${reason}`);
+      
       // Automatically analyze the page content
       analyzePageContent().then(response => {
         if (response.success) {
@@ -58,6 +66,38 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     }
     sendResponse({ success: true });
     return true;
+  } else if (request.action === 'getDomainAutoHighlightStatus') {
+    // Get auto-highlight status for the current domain
+    if (window.IntelliReadCache && window.IntelliReadCache.isDomainAutoHighlightEnabled) {
+      window.IntelliReadCache.isDomainAutoHighlightEnabled()
+        .then(enabled => {
+          sendResponse({ enabled: enabled });
+        })
+        .catch(error => {
+          console.error('Error getting domain auto-highlight status:', error);
+          sendResponse({ enabled: false, error: error.message });
+        });
+      return true;
+    } else {
+      sendResponse({ enabled: false, error: 'Cache system not ready' });
+      return true;
+    }
+  } else if (request.action === 'setDomainAutoHighlight') {
+    // Set auto-highlight status for the current domain
+    if (window.IntelliReadCache && window.IntelliReadCache.setDomainAutoHighlight) {
+      window.IntelliReadCache.setDomainAutoHighlight(request.enabled)
+        .then(() => {
+          sendResponse({ success: true });
+        })
+        .catch(error => {
+          console.error('Error setting domain auto-highlight:', error);
+          sendResponse({ success: false, error: error.message });
+        });
+      return true;
+    } else {
+      sendResponse({ success: false, error: 'Cache system not ready' });
+      return true;
+    }
   }
 });
 

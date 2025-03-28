@@ -138,5 +138,21 @@
   "language_zh": {
     "message": "中文",
     "description": "中文选项"
+  },
+  "auto_highlight_label": {
+    "message": "为此网站自动高亮",
+    "description": "自动高亮复选框标签"
+  },
+  "auto_highlight_enabled": {
+    "message": "已为以下网站启用自动高亮",
+    "description": "自动高亮已启用提示"
+  },
+  "auto_highlight_disabled": {
+    "message": "已为以下网站禁用自动高亮",
+    "description": "自动高亮已禁用提示"
+  },
+  "auto_highlight_error": {
+    "message": "设置自动高亮偏好失败",
+    "description": "自动高亮错误提示"
   }
 } 

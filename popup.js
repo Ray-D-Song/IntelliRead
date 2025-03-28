@@ -5,6 +5,15 @@ document.addEventListener('DOMContentLoaded', () => {
   const settingsButton = document.getElementById('settings-btn');
   const clearButton = document.getElementById('clear-btn');
   const statusDiv = document.getElementById('status');
+  const autoHighlightCheckbox = document.getElementById('auto-highlight-checkbox');
+  const currentDomainSpan = document.getElementById('current-domain');
+
+  // Get current domain and update the domain text
+  getCurrentTabDomain().then(domain => {
+    currentDomainSpan.textContent = domain;
+    // Check if auto-highlight is enabled for this domain
+    checkDomainAutoHighlightStatus();
+  });
 
   // check if API is configured
   chrome.storage.sync.get(['apiUrl', 'apiKey', 'modelName'], (items) => {
@@ -12,6 +21,11 @@ document.addEventListener('DOMContentLoaded', () => {
       showStatus(chrome.i18n.getMessage('configure_api'), 'warning');
       analyzeButton.disabled = true;
     }
+  });
+
+  // Auto-highlight checkbox change event
+  autoHighlightCheckbox.addEventListener('change', () => {
+    setDomainAutoHighlight(autoHighlightCheckbox.checked);
   });
 
   // analyze current page button
@@ -64,6 +78,56 @@ document.addEventListener('DOMContentLoaded', () => {
     statusDiv.className = `status ${type}`;
   }
 
+  // Get the current tab's domain
+  async function getCurrentTabDomain() {
+    return new Promise((resolve) => {
+      chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+        const url = new URL(tabs[0].url);
+        resolve(url.hostname);
+      });
+    });
+  }
+
+  // Check if auto-highlight is enabled for the current domain
+  function checkDomainAutoHighlightStatus() {
+    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+      chrome.tabs.sendMessage(
+        tabs[0].id,
+        { action: 'getDomainAutoHighlightStatus' },
+        (response) => {
+          if (response && typeof response.enabled === 'boolean') {
+            autoHighlightCheckbox.checked = response.enabled;
+          } else {
+            console.error('Failed to get domain auto-highlight status', response?.error);
+            autoHighlightCheckbox.checked = false;
+          }
+        }
+      );
+    });
+  }
+
+  // Set auto-highlight status for the current domain
+  function setDomainAutoHighlight(enabled) {
+    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+      chrome.tabs.sendMessage(
+        tabs[0].id,
+        { action: 'setDomainAutoHighlight', enabled: enabled },
+        (response) => {
+          if (response && response.success) {
+            const messageKey = enabled ? 'auto_highlight_enabled' : 'auto_highlight_disabled';
+            const domain = currentDomainSpan.textContent;
+            showStatus(`${chrome.i18n.getMessage(messageKey)} ${domain}`, 'info');
+          } else {
+            showStatus(chrome.i18n.getMessage('auto_highlight_error'), 'warning');
+            console.error('Failed to set domain auto-highlight status', response?.error);
+            // Revert checkbox state
+            checkDomainAutoHighlightStatus();
+          }
+        }
+      );
+    });
+  }
+
   function localizeUI() {
     document.getElementById('analyze-btn').textContent = chrome.i18n.getMessage('analyze_button');
     document.getElementById('settings-btn').textContent = chrome.i18n.getMessage('settings_button');
@@ -71,6 +135,12 @@ document.addEventListener('DOMContentLoaded', () => {
     document.querySelector('h1').textContent = chrome.i18n.getMessage('popup_title');
     
     document.title = chrome.i18n.getMessage("popup_title");
+    
+    // Set auto-highlight label from localization
+    const autoHighlightLabel = chrome.i18n.getMessage('auto_highlight_label');
+    if (autoHighlightLabel) {
+      document.querySelector('label[for="auto-highlight-checkbox"]').textContent = autoHighlightLabel;
+    }
     
     const elementsWithText = document.querySelectorAll('h1, h2, h3, label, button');
     elementsWithText.forEach(el => {

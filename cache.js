@@ -8,9 +8,10 @@ window.IntelliReadCache = {};
 
 // database name and version
 const DB_NAME = 'intelliread-cache';
-const DB_VERSION = 2; // Increased version for schema update
+const DB_VERSION = 3; // Increased version for new schema
 const STORE_NAME = 'highlights';
-const URL_STORE_NAME = 'highlighted_urls'; // New store for highlighted URLs
+const URL_STORE_NAME = 'highlighted_urls'; // Store for highlighted URLs
+const AUTO_DOMAIN_STORE = 'auto_highlight_domains'; // New store for domains with auto-highlight enabled
 
 // cache expiration time (milliseconds), default 30 days
 const CACHE_EXPIRATION = 30 * 24 * 60 * 60 * 1000;
@@ -56,10 +57,15 @@ function openDatabase() {
         store.createIndex('timestamp', 'timestamp', { unique: false });
       }
       
-      // Create a new store for highlighted URLs if it doesn't exist
+      // Create a store for highlighted URLs if it doesn't exist
       if (!db.objectStoreNames.contains(URL_STORE_NAME)) {
         const urlStore = db.createObjectStore(URL_STORE_NAME, { keyPath: 'url' });
         urlStore.createIndex('timestamp', 'timestamp', { unique: false });
+      }
+      
+      // Create a store for domains with auto-highlight enabled
+      if (!db.objectStoreNames.contains(AUTO_DOMAIN_STORE)) {
+        db.createObjectStore(AUTO_DOMAIN_STORE, { keyPath: 'domain' });
       }
     };
   });
@@ -260,6 +266,98 @@ async function hasUrlBeenHighlighted() {
 }
 
 /**
+ * Enable auto-highlight for the current domain
+ * @param {boolean} enabled Whether to enable or disable auto-highlight
+ * @returns {Promise<void>}
+ */
+async function setDomainAutoHighlight(enabled) {
+  try {
+    const domain = getCurrentDomain();
+    const db = await openDatabase();
+    
+    const transaction = db.transaction(AUTO_DOMAIN_STORE, 'readwrite');
+    const store = transaction.objectStore(AUTO_DOMAIN_STORE);
+    
+    return new Promise((resolve, reject) => {
+      if (enabled) {
+        // Add domain to auto-highlight list
+        const domainData = {
+          domain,
+          timestamp: Date.now()
+        };
+        
+        const request = store.put(domainData);
+        
+        request.onsuccess = () => {
+          console.log(`Auto-highlight enabled for domain: ${domain}`);
+          resolve();
+        };
+        
+        request.onerror = (event) => {
+          console.error('Failed to enable auto-highlight for domain:', event.target.error);
+          reject(event.target.error);
+        };
+      } else {
+        // Remove domain from auto-highlight list
+        const request = store.delete(domain);
+        
+        request.onsuccess = () => {
+          console.log(`Auto-highlight disabled for domain: ${domain}`);
+          resolve();
+        };
+        
+        request.onerror = (event) => {
+          console.error('Failed to disable auto-highlight for domain:', event.target.error);
+          reject(event.target.error);
+        };
+      }
+      
+      transaction.oncomplete = () => {
+        db.close();
+      };
+    });
+  } catch (error) {
+    console.error('Failed to set domain auto-highlight:', error);
+    throw error;
+  }
+}
+
+/**
+ * Check if auto-highlight is enabled for the current domain
+ * @returns {Promise<boolean>} Returns true if auto-highlight is enabled for the domain
+ */
+async function isDomainAutoHighlightEnabled() {
+  try {
+    const domain = getCurrentDomain();
+    const db = await openDatabase();
+    
+    const transaction = db.transaction(AUTO_DOMAIN_STORE, 'readonly');
+    const store = transaction.objectStore(AUTO_DOMAIN_STORE);
+    
+    return new Promise((resolve, reject) => {
+      const request = store.get(domain);
+      
+      request.onsuccess = (event) => {
+        const result = event.target.result;
+        resolve(!!result); // Convert to boolean
+      };
+      
+      request.onerror = (event) => {
+        console.error('Failed to check domain auto-highlight:', event.target.error);
+        reject(event.target.error);
+      };
+
+      transaction.oncomplete = () => {
+        db.close();
+      };
+    });
+  } catch (error) {
+    console.error('Failed to check domain auto-highlight:', error);
+    return false;
+  }
+}
+
+/**
  * Clear expired cache entries from both stores
  * @returns {Promise<void>}
  */
@@ -376,3 +474,5 @@ async function cacheAnalysisResult(content, keypoints) {
 window.IntelliReadCache.checkCache = checkCache;
 window.IntelliReadCache.cacheAnalysisResult = cacheAnalysisResult;
 window.IntelliReadCache.hasUrlBeenHighlighted = hasUrlBeenHighlighted;
+window.IntelliReadCache.setDomainAutoHighlight = setDomainAutoHighlight;
+window.IntelliReadCache.isDomainAutoHighlightEnabled = isDomainAutoHighlightEnabled;
