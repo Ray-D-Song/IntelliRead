@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>IntelliRead</title>
+  <meta charset="UTF-8">
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0;
+      padding: 0;
+      width: 320px;
+      background-color: #f5f5f5;
+    }
+    .container {
+      padding: 15px;
+    }
+    h1 {
+      font-size: 18px;
+      color: #2c3e50;
+      margin-top: 0;
+      border-bottom: 2px solid #3498db;
+      padding-bottom: 8px;
+    }
+    button {
+      background-color: #3498db;
+      color: white;
+      border: none;
+      padding: 8px 15px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+      width: 100%;
+      margin-bottom: 10px;
+    }
+    button:hover {
+      background-color: #2980b9;
+    }
+    button:disabled {
+      background-color: #95a5a6;
+      cursor: not-allowed;
+    }
+    .status {
+      padding: 10px;
+      margin-top: 10px;
+      border-radius: 4px;
+      font-size: 14px;
+    }
+    .info {
+      background-color: #d1ecf1;
+      color: #0c5460;
+    }
+    .warning {
+      background-color: #fff3cd;
+      color: #856404;
+    }
+    .action-buttons {
+      display: flex;
+      justify-content: space-between;
+    }
+    .action-buttons button {
+      width: 48%;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>IntelliRead</h1>
+    <button id="analyze-btn">Analyze the current page</button>
+    <div class="action-buttons">
+      <button id="settings-btn">Settings</button>
+      <button id="clear-btn">Clear highlights</button>
+    </div>
+    <div id="status" class="status info" style="display: none;"></div>
+  </div>
+  <script src="popup.js"></script>
+</body>
+</html> 

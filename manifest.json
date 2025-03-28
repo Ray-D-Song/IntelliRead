@@ -1,0 +1,44 @@
+{
+  "manifest_version": 3,
+  "name": "IntelliRead",
+  "version": "1.0",
+  "description": "Using AI to help people with reading disabilities read better",
+  "permissions": [
+    "storage",
+    "activeTab",
+    "contextMenus",
+    "scripting"
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "images/icon16.png",
+      "48": "images/icon48.png",
+      "128": "images/icon128.png"
+    }
+  },
+  "options_page": "options.html",
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content.js"],
+      "css": ["styles.css"]
+    }
+  ],
+  "commands": {
+    "trigger-intelliread": {
+      "suggested_key": {
+        "default": "Ctrl+Shift+I"
+      },
+      "description": "Trigger IntelliRead to analyze the current page"
+    }
+  },
+  "icons": {
+    "16": "images/icon16.png",
+    "48": "images/icon48.png",
+    "128": "images/icon128.png"
+  }
+} 
