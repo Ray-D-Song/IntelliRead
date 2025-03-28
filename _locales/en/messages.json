@@ -1,0 +1,143 @@
+{
+  "extension_name": {
+    "message": "IntelliRead",
+    "description": "Name of the extension"
+  },
+  "extension_description": {
+    "message": "Using AI to help people with reading disabilities read better",
+    "description": "Description of the extension"
+  },
+  "options_title": {
+    "message": "IntelliRead Settings",
+    "description": "Title of the options page"
+  },
+  "api_presets": {
+    "message": "API Presets",
+    "description": "API presets section title"
+  },
+  "api_url_label": {
+    "message": "API Request URL:",
+    "description": "API URL label"
+  },
+  "api_key_label": {
+    "message": "API Key:",
+    "description": "API key label"
+  },
+  "model_name_label": {
+    "message": "Model Name:",
+    "description": "Model name label"
+  },
+  "highlight_style_label": {
+    "message": "Highlight Style:",
+    "description": "Highlight style label"
+  },
+  "highlight_color_label": {
+    "message": "Highlight Color:",
+    "description": "Highlight color label"
+  },
+  "preview_title": {
+    "message": "Preview",
+    "description": "Preview section title"
+  },
+  "preview_text": {
+    "message": "This is a normal text, this part shows the highlight effect.",
+    "description": "Preview text"
+  },
+  "save_button": {
+    "message": "Save",
+    "description": "Save button"
+  },
+  "reset_button": {
+    "message": "Reset",
+    "description": "Reset button"
+  },
+  "api_url_placeholder": {
+    "message": "e.g. https://api.openai.com/v1/chat/completions",
+    "description": "API URL placeholder"
+  },
+  "api_key_placeholder": {
+    "message": "Enter your API key",
+    "description": "API key placeholder"
+  },
+  "model_name_placeholder": {
+    "message": "e.g. gpt-4o-mini",
+    "description": "Model name placeholder"
+  },
+  "style_background": {
+    "message": "Background",
+    "description": "Background highlight style"
+  },
+  "style_underline": {
+    "message": "Underline",
+    "description": "Underline highlight style"
+  },
+  "style_dashed": {
+    "message": "Dashed",
+    "description": "Dashed highlight style"
+  },
+  "settings_saved": {
+    "message": "Settings saved",
+    "description": "Settings saved notification"
+  },
+  "settings_reset": {
+    "message": "Highlight settings reset to default",
+    "description": "Settings reset notification"
+  },
+  "fill_required": {
+    "message": "Please fill in all required fields",
+    "description": "Fill required fields notification"
+  },
+  "popup_title": {
+    "message": "IntelliRead",
+    "description": "Popup title"
+  },
+  "analyze_button": {
+    "message": "Analyze the current page",
+    "description": "Analyze button"
+  },
+  "settings_button": {
+    "message": "Settings",
+    "description": "Settings button"
+  },
+  "clear_button": {
+    "message": "Clear highlights",
+    "description": "Clear highlights button"
+  },
+  "configure_api": {
+    "message": "Please configure API information in the settings page",
+    "description": "Configure API notification"
+  },
+  "analyzing": {
+    "message": "Analyzing page content...",
+    "description": "Analyzing notification"
+  },
+  "analysis_complete": {
+    "message": "Analysis completed, page content highlighted",
+    "description": "Analysis complete notification"
+  },
+  "analysis_failed": {
+    "message": "Analysis failed, please try again",
+    "description": "Analysis failed notification"
+  },
+  "highlights_cleared": {
+    "message": "All highlights cleared",
+    "description": "Highlights cleared notification"
+  },
+  "clear_failed": {
+    "message": "Clear highlights failed",
+    "description": "Clear highlights failed notification"
+  },
+  "language_select": {
+    "message": "Language:",
+    "description": "Language selection label"
+  },
+  "language_en": {
+    "message": "English",
+    "description": "English language option"
+  },
+  "language_zh": {
+    "message": "中文",
+    "description": "Chinese language option"
+  }
+}
+ 

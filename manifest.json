@@ -1,8 +1,9 @@
 {
   "manifest_version": 3,
-  "name": "IntelliRead",
+  "name": "__MSG_extension_name__",
   "version": "1.0",
-  "description": "Using AI to help people with reading disabilities read better",
+  "description": "__MSG_extension_description__",
+  "default_locale": "en",
   "permissions": [
     "storage",
     "activeTab",

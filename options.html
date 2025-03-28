@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>IntelliRead Settings</title>
+  <title>__MSG_options_title__</title>
   <meta charset="UTF-8">
   <style>
     body {
@@ -156,36 +156,36 @@
 </head>
 <body>
   <div class="container">
-    <h1>IntelliRead Settings</h1>
+    <h1>__MSG_options_title__</h1>
     
     <div class="api-presets">
-      <h3>API Presets</h3>
+      <h3>__MSG_api_presets__</h3>
       <button type="button" class="api-preset-btn" data-url="https://api.openai.com/v1/chat/completions" data-model="gpt-4o-mini">OpenAI</button>
       <button type="button" class="api-preset-btn" data-url="https://openrouter.ai/api/v1/chat/completions" data-model="openai/gpt-4o-mini">OpenRouter</button>
     </div>
     
     <div class="form-group">
-      <label for="api-url">API Request URL:</label>
-      <input type="text" id="api-url" placeholder="例如: https://api.openai.com/v1/chat/completions">
+      <label for="api-url">__MSG_api_url_label__</label>
+      <input type="text" id="api-url" placeholder="__MSG_api_url_placeholder__">
     </div>
     <div class="form-group">
-      <label for="api-key">API Key:</label>
-      <input type="password" id="api-key" placeholder="Enter your API key">
+      <label for="api-key">__MSG_api_key_label__</label>
+      <input type="password" id="api-key" placeholder="__MSG_api_key_placeholder__">
     </div>
     <div class="form-group">
-      <label for="model-name">Model Name:</label>
-      <input type="text" id="model-name" placeholder="例如: gpt-4o-mini">
+      <label for="model-name">__MSG_model_name_label__</label>
+      <input type="text" id="model-name" placeholder="__MSG_model_name_placeholder__">
     </div>
     <div class="form-group">
-      <label for="highlight-style">Highlight Style:</label>
+      <label for="highlight-style">__MSG_highlight_style_label__</label>
       <select id="highlight-style">
-        <option value="background">Background</option>
-        <option value="underline">Underline</option>
-        <option value="dashed">Dashed</option>
+        <option value="background">__MSG_style_background__</option>
+        <option value="underline">__MSG_style_underline__</option>
+        <option value="dashed">__MSG_style_dashed__</option>
       </select>
     </div>
     <div class="form-group">
-      <label for="highlight-color">Highlight Color:</label>
+      <label for="highlight-color">__MSG_highlight_color_label__</label>
       <div class="color-picker-container">
         <input type="color" id="highlight-color" value="#ADD8E6">
         <div class="color-preview" id="color-preview"></div>
@@ -193,12 +193,12 @@
       </div>
     </div>
     <div class="preview-section">
-      <h3>Preview</h3>
-      <p>This is a normal text, <span id="preview-text">this part</span> shows the highlight effect.</p>
+      <h3>__MSG_preview_title__</h3>
+      <p id="preview-normal-text"></p>
     </div>
     <div class="button-group">
-      <button id="save-btn">Save</button>
-      <button id="reset-btn" class="reset-btn">Reset</button>
+      <button id="save-btn">__MSG_save_button__</button>
+      <button id="reset-btn" class="reset-btn">__MSG_reset_button__</button>
     </div>
     <div id="status" class="status"></div>
   </div>

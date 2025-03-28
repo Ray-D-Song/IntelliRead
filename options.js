@@ -1,4 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
+  localizeUI();
+
   // default highlight settings
   const defaultHighlightSettings = {
     highlightColor: '#ADD8E6',
@@ -86,7 +88,7 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('highlight-color').value = defaultHighlightSettings.highlightColor;
     document.getElementById('highlight-style').value = defaultHighlightSettings.highlightStyle;
     updatePreview();
-    showStatus('Highlight settings reset to default', true);
+    showStatus(chrome.i18n.getMessage('settings_reset'), true);
   });
 
   // save settings button click event
@@ -99,7 +101,7 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // validate input
     if (!apiUrl || !apiKey || !modelName) {
-      showStatus('Please fill in all required fields', false);
+      showStatus(chrome.i18n.getMessage('fill_required'), false);
       return;
     }
 
@@ -113,7 +115,7 @@ document.addEventListener('DOMContentLoaded', () => {
         highlightStyle
       },
       () => {
-        showStatus('Settings saved', true);
+        showStatus(chrome.i18n.getMessage('settings_saved'), true);
       }
     );
   });
@@ -134,5 +136,43 @@ document.addEventListener('DOMContentLoaded', () => {
     setTimeout(() => {
       statusEl.style.display = 'none';
     }, 3000);
+  }
+
+  function localizeUI() {
+    document.querySelectorAll('[id$="-text"]').forEach(el => {
+      if (el.id !== 'preview-text' && el.id !== 'color-value') {
+        const messageName = el.id.replace('-text', '');
+        el.textContent = chrome.i18n.getMessage(messageName);
+      }
+    });
+
+    document.title = chrome.i18n.getMessage("options_title");
+    
+    const elementsWithText = document.querySelectorAll('h1, h2, h3, label, button, option');
+    elementsWithText.forEach(el => {
+      if (el.textContent.includes('__MSG_')) {
+        const messageName = el.textContent.match(/__MSG_([a-zA-Z0-9_]+)__/)[1];
+        el.textContent = chrome.i18n.getMessage(messageName);
+      }
+    });
+    
+    const inputElements = document.querySelectorAll('input[placeholder]');
+    inputElements.forEach(el => {
+      if (el.placeholder.includes('__MSG_')) {
+        const messageName = el.placeholder.match(/__MSG_([a-zA-Z0-9_]+)__/)[1];
+        el.placeholder = chrome.i18n.getMessage(messageName);
+      }
+    });
+
+    const previewNormalText = document.getElementById('preview-normal-text');
+    if (previewNormalText) {
+      const previewText = chrome.i18n.getMessage('preview_text');
+      const parts = previewText.split('，');
+      if (parts.length > 1) {
+        previewNormalText.innerHTML = parts[0] + '，<span id="preview-text">' + parts[1] + '</span>';
+      } else {
+        previewNormalText.innerHTML = '<span id="preview-text">' + previewText + '</span>';
+      }
+    }
   }
 });

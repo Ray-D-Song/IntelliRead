@@ -1,4 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
+  localizeUI();
+
   const analyzeButton = document.getElementById('analyze-btn');
   const settingsButton = document.getElementById('settings-btn');
   const clearButton = document.getElementById('clear-btn');
@@ -7,7 +9,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // check if API is configured
   chrome.storage.sync.get(['apiUrl', 'apiKey', 'modelName'], (items) => {
     if (!items.apiUrl || !items.apiKey || !items.modelName) {
-      showStatus('Please configure API information in the settings page', 'warning');
+      showStatus(chrome.i18n.getMessage('configure_api'), 'warning');
       analyzeButton.disabled = true;
     }
   });
@@ -15,7 +17,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // analyze current page button
   analyzeButton.addEventListener('click', () => {
     analyzeButton.disabled = true;
-    showStatus('Analyzing page content...', 'info');
+    showStatus(chrome.i18n.getMessage('analyzing'), 'info');
     
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
       chrome.tabs.sendMessage(
@@ -23,9 +25,9 @@ document.addEventListener('DOMContentLoaded', () => {
         { action: 'analyzeContent' },
         (response) => {
           if (response && response.success) {
-            showStatus('Analysis completed, page content highlighted', 'info');
+            showStatus(chrome.i18n.getMessage('analysis_complete'), 'info');
           } else {
-            showStatus(response?.message || 'Analysis failed, please try again', 'warning');
+            showStatus(response?.message || chrome.i18n.getMessage('analysis_failed'), 'warning');
           }
           analyzeButton.disabled = false;
         }
@@ -46,9 +48,9 @@ document.addEventListener('DOMContentLoaded', () => {
         { action: 'clearHighlights' },
         (response) => {
           if (response && response.success) {
-            showStatus('All highlights cleared', 'info');
+            showStatus(chrome.i18n.getMessage('highlights_cleared'), 'info');
           } else {
-            showStatus('Clear highlights failed', 'warning');
+            showStatus(chrome.i18n.getMessage('clear_failed'), 'warning');
           }
         }
       );
@@ -60,5 +62,22 @@ document.addEventListener('DOMContentLoaded', () => {
     statusDiv.textContent = message;
     statusDiv.style.display = 'block';
     statusDiv.className = `status ${type}`;
+  }
+
+  function localizeUI() {
+    document.getElementById('analyze-btn').textContent = chrome.i18n.getMessage('analyze_button');
+    document.getElementById('settings-btn').textContent = chrome.i18n.getMessage('settings_button');
+    document.getElementById('clear-btn').textContent = chrome.i18n.getMessage('clear_button');
+    document.querySelector('h1').textContent = chrome.i18n.getMessage('popup_title');
+    
+    document.title = chrome.i18n.getMessage("popup_title");
+    
+    const elementsWithText = document.querySelectorAll('h1, h2, h3, label, button');
+    elementsWithText.forEach(el => {
+      if (el.textContent.includes('__MSG_')) {
+        const messageName = el.textContent.match(/__MSG_([a-zA-Z0-9_]+)__/)[1];
+        el.textContent = chrome.i18n.getMessage(messageName);
+      }
+    });
   }
 }); 

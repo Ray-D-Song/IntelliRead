@@ -1,0 +1,142 @@
+{
+  "extension_name": {
+    "message": "IntelliRead智能阅读",
+    "description": "扩展名称"
+  },
+  "extension_description": {
+    "message": "使用AI帮助阅读障碍人士更好地阅读",
+    "description": "扩展描述"
+  },
+  "options_title": {
+    "message": "IntelliRead 设置",
+    "description": "设置页面标题"
+  },
+  "api_presets": {
+    "message": "API 预设",
+    "description": "API预设部分标题"
+  },
+  "api_url_label": {
+    "message": "API 请求地址：",
+    "description": "API URL标签"
+  },
+  "api_key_label": {
+    "message": "API 密钥：",
+    "description": "API密钥标签"
+  },
+  "model_name_label": {
+    "message": "模型名称：",
+    "description": "模型名称标签"
+  },
+  "highlight_style_label": {
+    "message": "高亮样式：",
+    "description": "高亮样式标签"
+  },
+  "highlight_color_label": {
+    "message": "高亮颜色：",
+    "description": "高亮颜色标签"
+  },
+  "preview_title": {
+    "message": "预览",
+    "description": "预览部分标题"
+  },
+  "preview_text": {
+    "message": "这是普通文本，这部分展示高亮效果。",
+    "description": "预览文本"
+  },
+  "save_button": {
+    "message": "保存",
+    "description": "保存按钮"
+  },
+  "reset_button": {
+    "message": "重置",
+    "description": "重置按钮"
+  },
+  "api_url_placeholder": {
+    "message": "例如: https://api.openai.com/v1/chat/completions",
+    "description": "API URL占位文本"
+  },
+  "api_key_placeholder": {
+    "message": "输入您的 API 密钥",
+    "description": "API密钥占位文本"
+  },
+  "model_name_placeholder": {
+    "message": "例如: gpt-4o-mini",
+    "description": "模型名称占位文本"
+  },
+  "style_background": {
+    "message": "背景",
+    "description": "背景高亮样式"
+  },
+  "style_underline": {
+    "message": "下划线",
+    "description": "下划线高亮样式"
+  },
+  "style_dashed": {
+    "message": "虚线",
+    "description": "虚线高亮样式"
+  },
+  "settings_saved": {
+    "message": "设置已保存",
+    "description": "设置保存成功提示"
+  },
+  "settings_reset": {
+    "message": "高亮设置已重置为默认值",
+    "description": "设置重置提示"
+  },
+  "fill_required": {
+    "message": "请填写所有必填字段",
+    "description": "填写必填字段提示"
+  },
+  "popup_title": {
+    "message": "IntelliRead",
+    "description": "弹出窗口标题"
+  },
+  "analyze_button": {
+    "message": "分析当前页面",
+    "description": "分析按钮"
+  },
+  "settings_button": {
+    "message": "设置",
+    "description": "设置按钮"
+  },
+  "clear_button": {
+    "message": "清除高亮",
+    "description": "清除高亮按钮"
+  },
+  "configure_api": {
+    "message": "请在设置页面配置API信息",
+    "description": "配置API提示"
+  },
+  "analyzing": {
+    "message": "正在分析页面内容...",
+    "description": "分析中提示"
+  },
+  "analysis_complete": {
+    "message": "分析完成，页面内容已高亮",
+    "description": "分析完成提示"
+  },
+  "analysis_failed": {
+    "message": "分析失败，请重试",
+    "description": "分析失败提示"
+  },
+  "highlights_cleared": {
+    "message": "所有高亮已清除",
+    "description": "高亮清除提示"
+  },
+  "clear_failed": {
+    "message": "清除高亮失败",
+    "description": "清除高亮失败提示"
+  },
+  "language_select": {
+    "message": "语言：",
+    "description": "语言选择标签"
+  },
+  "language_en": {
+    "message": "English",
+    "description": "英文选项"
+  },
+  "language_zh": {
+    "message": "中文",
+    "description": "中文选项"
+  }
+} 
