@@ -45,7 +45,26 @@ async function analyzePageContent() {
       const text = el.textContent;
       if (text.length < 30) return;
       
-      const keypoints = await analyzeWithAI(text, settings);
+      // check if the content is in the cache
+      let keypoints = null;
+      
+      // ensure IntelliReadCache is loaded
+      if (window.IntelliReadCache && window.IntelliReadCache.checkCache) {
+        keypoints = await window.IntelliReadCache.checkCache(text);
+      }
+      
+      // if the cache is not hit, analyze with AI
+      if (!keypoints) {
+        keypoints = await analyzeWithAI(text, settings);
+        
+        // save the analysis result to the cache
+        if (keypoints && keypoints.length > 0 && window.IntelliReadCache && window.IntelliReadCache.cacheAnalysisResult) {
+          await window.IntelliReadCache.cacheAnalysisResult(text, keypoints);
+        }
+      } else {
+        console.log('Cache hit, using cached data:', keypoints);
+      }
+      
       if (keypoints.length === 0) return;
       
       // filter none existing keypoints
